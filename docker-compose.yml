@@ -1,0 +1,105 @@
+version: '3'
+services: 
+  pool-db:
+    container_name: pool-db
+    image: pool-db
+    build: db
+    environment:
+      - SERVER_PORT=5432
+      - TZ=Europe/Moscow
+      - MYSQL_ROOT_PASSWORD=123
+      - MYSQL_PASSWORD=pool
+      - MYSQL_USER=pool
+      - MYSQL_DATABASE=pool
+    volumes:
+      - ./data-db:/var/lib/mysql
+    restart: unless-stopped
+  pool-web:
+    container_name: pool-web
+    image: pool-web
+    build: web
+    ports:
+      - 8082:80
+    volumes:
+      - ./logs/nginx:/var/log/nginx
+      - ./logs/yiimp:/work/yiimp/log
+    environment:
+      - ABE=/abe
+      - BLOCKCHAIN=/data
+    restart: unless-stopped
+  pool-main:
+    container_name: pool-main
+    image: pool-main
+    build: cron
+    entrypoint: |
+      bash -c 'bash -s <<EOF
+      trap "break;exit" SIGHUP SIGINT SIGTERM
+      while /bin/true; do
+        echo `date +%c`: running main
+        curl -s -o - http://pool-web/mainwrapper.php
+        echo `date +%c`: finished main
+        sleep 90
+      done
+      EOF'
+    restart: unless-stopped
+  pool-blocks:
+    container_name: pool-blocks
+    image: pool-blocks
+    build: cron
+    entrypoint: |
+      bash -c 'bash -s <<EOF
+      trap "break;exit" SIGHUP SIGINT SIGTERM
+      while /bin/true; do
+        echo `date +%c`: running blocks
+        curl -s -o - http://pool-web/blockswrapper.php
+        echo `date +%c`: finished blocks
+        sleep 20
+      done
+      EOF'
+    restart: unless-stopped
+  pool-loop:
+    container_name: pool-loop
+    image: pool-loop
+    build: cron
+    entrypoint: |
+      bash -c 'bash -s <<EOF
+      trap "break;exit" SIGHUP SIGINT SIGTERM
+      while /bin/true; do
+        echo `date +%c`: running loop
+        curl -s -o - http://pool-web/loopwrapper.php
+        echo `date +%c`: finished loop
+        sleep 60
+      done
+      EOF'
+    restart: unless-stopped
+  pool-stratum-x11:
+    container_name: pool-stratum-x11
+    image: pool-stratum-x11
+    build: cron
+    entrypoint: |
+      bash -c 'bash -s <<EOF
+      trap "break;exit" SIGHUP SIGINT SIGTERM
+      while /bin/true; do
+        echo `date +%c`: running stratum x11
+        curl -s -o - http://pool-web/stratumwrapper.php?config=x11
+        echo `date +%c`: finished stratum x11
+        sleep 1
+      done
+      EOF'
+    restart: unless-stopped
+  pool-stratum-c11:
+    container_name: pool-stratum-c11
+    image: pool-stratum-c11
+    build: cron
+    entrypoint: |
+      bash -c 'bash -s <<EOF
+      trap "break;exit" SIGHUP SIGINT SIGTERM
+      while /bin/true; do
+        echo `date +%c`: running stratum c11
+        curl -s -o - http://pool-web/stratumwrapper.php?config=c11
+        echo `date +%c`: finished stratum c11
+        sleep 1
+      done
+      EOF'
+    restart: unless-stopped
+
