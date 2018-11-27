@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "$@" >>/var/log/stratum/notify-block.log
+/home/fullnode/blocknotify "$STRATUM_HOST:$STRATUM_PORT" $STRATUM_COINID $@ 2>&1 >>/var/log/stratum/notify-block.log
+

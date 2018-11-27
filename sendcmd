@@ -1,0 +1,7 @@
+#!/bin/bash
+CMD=$@
+if [ "$1" = "" ]; then
+    CMD="getaccountaddress \"\""
+fi
+
+dash-cli -rpcconnect=127.0.0.1 -rpcport=11335 -rpcuser=rpc -rpcpassword=123 $CMD

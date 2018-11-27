@@ -14,15 +14,53 @@ services:
     volumes:
       - ./data-db:/var/lib/mysql
     restart: unless-stopped
+  pool-node:
+    container_name: pool-node
+    image: pool-node
+    build: node
+    volumes:
+      - ./data-node:/home/fullnode/.dashcore
+      - ./logs/notify:/var/log/stratum
+    environment:
+      - STRATUM_PORT=3573
+      - STRATUM_HOST=pool-web
+      - STRATUM_COINID=2033
+    ports:
+      - 11333:11303
+      - 11335:11305
+    user: fullnode
+    command: 
+      - /home/fullnode/dashd 
+      - "-listen"
+      - "-server"
+      - "-rest"
+      - "-rpcuser=rpc"
+      - "-rpcpassword=123"
+      - "-rpcallowip=10.0.0.0/8"
+      - "-rpcallowip=192.168.0.0/16"
+      - "-rpcallowip=127.0.0.0/8"
+      - "-rpcallowip=172.0.0.0/8"
+      - "-rpcbind=0.0.0.0 -rpcthreads=8"
+      - "-alertnotify=/home/fullnode/notify-alert %s"
+      - "-blocknotify=/home/fullnode/notify-block %s"
+      - "-walletnotify=/home/fullnode/notify-wallet %s"
+      - "-instantsendnotify=/home/fullnode/notify-instantsend %s"
+    restart: unless-stopped
   pool-web:
     container_name: pool-web
     image: pool-web
     build: web
     ports:
       - 8082:80
+      - 3573:3573
+      - 3533:3533
     volumes:
+      - ~/data-node:/data/bitcore
       - ./logs/nginx:/var/log/nginx
       - ./logs/yiimp:/work/yiimp/log
+      - ./logs/fpm:/var/log/fpm
+      - ./logs/stratum:/var/stratum/log
+      - ./data-backup:/root/backup
     environment:
       - ABE=/abe
       - BLOCKCHAIN=/data
@@ -35,9 +73,7 @@ services:
       bash -c 'bash -s <<EOF
       trap "break;exit" SIGHUP SIGINT SIGTERM
       while /bin/true; do
-        echo `date +%c`: running main
         curl -s -o - http://pool-web/mainwrapper.php
-        echo `date +%c`: finished main
         sleep 90
       done
       EOF'
@@ -50,9 +86,7 @@ services:
       bash -c 'bash -s <<EOF
       trap "break;exit" SIGHUP SIGINT SIGTERM
       while /bin/true; do
-        echo `date +%c`: running blocks
         curl -s -o - http://pool-web/blockswrapper.php
-        echo `date +%c`: finished blocks
         sleep 20
       done
       EOF'
@@ -65,28 +99,24 @@ services:
       bash -c 'bash -s <<EOF
       trap "break;exit" SIGHUP SIGINT SIGTERM
       while /bin/true; do
-        echo `date +%c`: running loop
         curl -s -o - http://pool-web/loopwrapper.php
-        echo `date +%c`: finished loop
         sleep 60
       done
       EOF'
     restart: unless-stopped
-  pool-stratum-x11:
-    container_name: pool-stratum-x11
-    image: pool-stratum-x11
-    build: cron
-    entrypoint: |
-      bash -c 'bash -s <<EOF
-      trap "break;exit" SIGHUP SIGINT SIGTERM
-      while /bin/true; do
-        echo `date +%c`: running stratum x11
-        curl -s -o - http://pool-web/stratumwrapper.php?config=x11
-        echo `date +%c`: finished stratum x11
-        sleep 1
-      done
-      EOF'
-    restart: unless-stopped
+#  pool-stratum-x11:
+#    container_name: pool-stratum-x11
+#    image: pool-stratum-x11
+#    build: cron
+#    entrypoint: |
+#      bash -c 'bash -s <<EOF
+#      trap "break;exit" SIGHUP SIGINT SIGTERM
+#      while /bin/true; do
+#        curl -s -o - http://pool-web/stratumwrapper.php?config=x11
+#        sleep 1
+#      done
+#      EOF'
+#    restart: unless-stopped
   pool-stratum-c11:
     container_name: pool-stratum-c11
     image: pool-stratum-c11
@@ -95,9 +125,7 @@ services:
       bash -c 'bash -s <<EOF
       trap "break;exit" SIGHUP SIGINT SIGTERM
       while /bin/true; do
-        echo `date +%c`: running stratum c11
         curl -s -o - http://pool-web/stratumwrapper.php?config=c11
-        echo `date +%c`: finished stratum c11
         sleep 1
       done
       EOF'

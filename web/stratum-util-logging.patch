@@ -1,0 +1,30 @@
+diff --git a/stratum/util.cpp b/stratum/util.cpp
+index ef928c4..4bd00d4 100644
+--- a/stratum/util.cpp
++++ b/stratum/util.cpp
+@@ -93,13 +93,18 @@ FILE *g_rejectlog = NULL;
+ void initlog(const char *algo)
+ {
+ 	char debugfile[1024];
+-
+-	sprintf(debugfile, "%s.log", algo);
+-	g_debuglog = fopen(debugfile, "w");
+-
+-	g_stratumlog = fopen("stratum.log", "a");
+-	g_clientlog = fopen("client.log", "a");
+-	g_rejectlog = fopen("reject.log", "a");
++	char stratumfile[1024];
++	char clientfile[1024];
++	char rejectfile[1024];
++	sprintf(debugfile, "log/%s.log", algo);
++	sprintf(stratumfile, "log/%s-stratum.log", algo);
++	sprintf(clientfile, "log/%s-client.log", algo);
++	sprintf(rejectfile, "log/%s-reject.log", algo);
++
++	g_debuglog = fopen(debugfile, "a");
++	g_stratumlog = fopen(stratumfile, "a");
++	g_clientlog = fopen(clientfile, "a");
++	g_rejectlog = fopen(rejectfile, "a");
+ }
+ 
+ void closelogs()

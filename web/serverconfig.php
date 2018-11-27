@@ -2,7 +2,7 @@
 
 ini_set('date.timezone', 'UTC');
 
-define('YAAMP_LOGS', '/var/log');
+define('YAAMP_LOGS', '/work/yiimp/log');
 define('YAAMP_HTDOCS', '/var/web');
 define('YAAMP_BIN', '/var/stratum');
 
@@ -30,11 +30,11 @@ define('YIIMP_FIAT_ALTERNATIVE', 'EUR'); // USD is main
 define('YAAMP_USE_NICEHASH_API', false);
 
 define('YAAMP_BTCADDRESS', '1Auhps1mHZQpoX4mCcVL8odU81VakZQ6dR');
-define('YAAMP_SITE_URL', 'yiimp.com');
+define('YAAMP_SITE_URL', 'testpool.com');
 define('YAAMP_STRATUM_URL', YAAMP_SITE_URL); // change if your stratum server is on a different host
 define('YAAMP_SITE_NAME', 'YiiMPTest');
-define('YAAMP_ADMIN_EMAIL', 'yiimp@spam.la');
-define('YAAMP_ADMIN_IP', ''); // samples: "80.236.118.26,90.234.221.11" or "10.0.0.1/8"
+define('YAAMP_ADMIN_EMAIL', 'yiimp@testpool.com');
+define('YAAMP_ADMIN_IP', '172.0.0.0/8'); // samples: "80.236.118.26,90.234.221.11" or "10.0.0.1/8"
 define('YAAMP_ADMIN_WEBCONSOLE', true);
 define('YAAMP_NOTIFY_NEW_COINS', true);
 define('YAAMP_DEFAULT_ALGO', 'c11');

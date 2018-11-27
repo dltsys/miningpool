@@ -1,0 +1,21 @@
+#!/bin/bash
+
+ulimit -n 10240
+ulimit -u 10240
+
+cd /var/stratum
+
+if [ ! -f stratum-$1 ]; then
+    ln -s /var/stratum/stratum /var/stratum/stratum-$1
+fi
+
+if [ -f lock.$1 ]; then
+    echo Already running $1
+    exit
+fi
+
+trap "break;rm -f lock.$1; exit" SIGHUP SIGINT SIGTERM
+touch lock.$1
+./stratum-$1 $1
+rm -f lock.$1
+
